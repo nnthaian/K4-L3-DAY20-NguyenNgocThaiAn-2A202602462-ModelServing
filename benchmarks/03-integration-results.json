@@ -1,0 +1,104 @@
+{
+  "backend": "keyword overlap",
+  "mean_ms": {
+    "embed": 0.0,
+    "retrieve": 0.1,
+    "llm": 7178.2,
+    "total": 7178.3
+  },
+  "results": [
+    {
+      "query": "Why is goodput more useful than raw throughput?",
+      "answer": "Based on the context provided, **Goodput** is more useful than raw throughput because it addresses the fundamental limitation of raw throughput: **it ignores SLOs (Service Level Objectives) at saturation**.\n\nHere is the breakdown of why this distinction matters:\n\n1.  **Raw Throughput Ignores SLOs**: As stated in the context, \"Throughput at saturation ignores SLOs.\" This means that if a system hits its maximum capacity (saturation), raw throughput metrics will artificially inflate, potentially leading to false positives where the system is actually over-provisioned or failing to meet its actual performance targets.\n2.  **Goodput Captures Actual Performance**: Goodput specifically counts only requests per second that met the TTFT (Target Throughput for Functionality) and TPOT (Target Throughput for Performance) targets. This ensures that the system's utilization is measured against its actual performance goals rather than just its raw capacity.\n\n**Conclusion:**\nGoodput",
+      "contexts": [
+        {
+          "id": "goodput",
+          "score": 1.0
+        },
+        {
+          "id": "paged",
+          "score": 0.0
+        },
+        {
+          "id": "radix",
+          "score": 0.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 8447.8,
+        "total": 8448.1
+      },
+      "server_timings": {
+        "prompt_n": 4,
+        "prompt_ms": 52.788,
+        "predicted_n": 200,
+        "predicted_ms": 6023.323
+      }
+    },
+    {
+      "query": "What problem does PagedAttention actually solve?",
+      "answer": "PagedAttention solves the problem of **internal fragmentation in GPU memory** caused by storing key-value pairs (KV cache) in non-contiguous pages.\n\nBy storing the cache in non-contiguous pages, the model avoids the wasted space that would occur if all KV data were packed into a single contiguous block of memory. This design allows the engine to remove this fragmentation, thereby maximizing available GPU memory for tasks like decoding and serving.",
+      "contexts": [
+        {
+          "id": "paged",
+          "score": 1.0
+        },
+        {
+          "id": "radix",
+          "score": 0.0
+        },
+        {
+          "id": "disagg",
+          "score": 0.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 5054.1,
+        "total": 5054.2
+      },
+      "server_timings": {
+        "prompt_n": 4,
+        "prompt_ms": 53.208,
+        "predicted_n": 87,
+        "predicted_ms": 2695.931
+      }
+    },
+    {
+      "query": "When does splitting prefill and decode help?",
+      "answer": "Based on the provided context, splitting prefill and decode helps primarily during **continuous batching**.\n\nThe reasoning is as follows:\n1.  **Context**: The context states that prefill and decode are compute-bound and memory-bandwidth-bound respectively.\n2.  **Mechanism**: Continuous batching allows requests to join and leave the running batch each time they are decoded.\n3.  **Benefit**: By splitting these operations, the system can utilize the **RadixAttention** cache (which caches keys by token prefix) more effectively. Specifically, the context notes that \"a shared prefix lets the engine skip prefill entirely.\" This means that when a request is split, the engine can skip the expensive prefill step for that specific token prefix, thereby reducing compute and memory bandwidth usage.\n\nTherefore, splitting helps when **continuous batching** is active, specifically to optimize the RadixAttention cache by skipping redundant prefill steps.",
+      "contexts": [
+        {
+          "id": "disagg",
+          "score": 2.0
+        },
+        {
+          "id": "radix",
+          "score": 1.0
+        },
+        {
+          "id": "batching",
+          "score": 1.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 8032.6,
+        "total": 8032.7
+      },
+      "server_timings": {
+        "prompt_n": 4,
+        "prompt_ms": 48.304,
+        "predicted_n": 189,
+        "predicted_ms": 5648.143
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# Reflection — Day 20 Lab (Personal Report)
+﻿# Reflection — Day 20 Lab (Personal Report)
 
 > **Đây là báo cáo cá nhân.** Số liệu của bạn **không** so sánh được với bạn cùng lớp
 > — chỉ so **before vs after trên chính máy bạn**. Rubric chấm độ rõ ràng của setup,
@@ -6,10 +6,10 @@
 >
 > `make verify` sẽ fail nếu còn placeholder chưa điền. Đó là cố ý.
 
-**Họ Tên:** _<Họ Tên>_
-**MSSV:** _<MSSV>_
-**Cohort:** _<A20-K1 / A20-K2 / ...>_
-**Ngày submit:** _<YYYY-MM-DD>_
+**Họ Tên:** Nguyễn Ngọc Thái An
+**MSSV:** 2A202602462
+**Cohort:** A20-K4
+**Ngày submit:** 2026-10-06
 
 ---
 
@@ -17,23 +17,22 @@
 
 > Từ `make probe`. Paste output hoặc điền tay.
 
-- **OS:** _<macOS 14 / Windows 11 / Ubuntu 24.04 / ...>_
-- **CPU:** _<Apple M2 / Intel i7-12700H / AMD Ryzen 7 5800H>_
-- **Cores:** _<physical / logical>_
-- **CPU extensions:** _<AVX2 / AVX-512 / NEON / —>_
-- **RAM:** _<GB>_
-- **Accelerator:** _<NVIDIA RTX 4060 / Apple Metal / Vulkan / CPU only>_
-- **llama.cpp asset đã tải:** _<vd: llama-b10488-bin-macos-arm64.tar.gz>_
-- **Model đã dùng:** _<Gemma 4 E2B / Qwen3.5 0.8B>_ (`LAB_MODEL=`_<gemma4-e2b / qwen35-0.8b>_)
-- **Quantization:** _<primary>_ + _<compare>_ (từ `models/active.json`)
+- **OS:** Windows 11
+- **CPU:** AMD Ryzen 5 4600H with Radeon Graphics
+- **Cores:** 6 physical / 12 logical
+- **CPU extensions:** Không được ghi trong `hardware.json`
+- **RAM:** 23.4 GB
+- **Accelerator:** NVIDIA GeForce GTX 1650, 4096 MiB; runtime dùng Vulkan vì driver CUDA 11.4 không tương thích bản CUDA đã chọn
+- **llama.cpp asset đã tải:** `llama-b10488-bin-win-vulkan-x64.zip`
+- **Model đã dùng:** Qwen3.5 0.8B (`LAB_MODEL=qwen35-0.8b`)
+- **Quantization:** `Q4_K_M` + `UD-Q2_K_XL`
 
-**Chạy ở đâu:** _<laptop của tôi / Colab / Kaggle>_
-_(Nếu dùng cloud fallback: nói rõ vì sao — RAM < 8 GB, setup fail, v.v. Không mất điểm.)_
+**Chạy ở đâu:** Laptop Windows local
 
 **Setup story** (≤ 80 chữ): điều gì cần thay đổi để lab chạy trên máy bạn? Có bước
 nào fail rồi phải workaround không?
 
-_Answer here._
+Máy dùng Windows 11, Python 3.13.4 và có đủ RAM cho model Qwen3.5 0.8B. Runtime llama.cpp đã chọn bản Vulkan vì driver CUDA 11.4 không chạy được bản CUDA tương ứng. Khi wrapper `lab.ps1` báo lỗi parser, mình chạy trực tiếp các script Python trong `labs/` bằng `.venv\Scripts\python.exe`.
 
 ---
 
@@ -43,66 +42,56 @@ _Answer here._
 
 | Quantization | Size (GB) | Load (ms) | TTFT P50/P95 (ms) | TPOT P50/P95 (ms) | E2E P50/P95/P99 (ms) | Decode (tok/s) |
 |---|--:|--:|--:|--:|--:|--:|
-| UD-Q4_K_XL | | | | | | |
-| UD-Q2_K_XL | | | | | | |
+| Q4_K_M | 0.50 | 2922 | 410 / 452 | 28.7 / 30.6 | 2219 / 2380 / 2380 | 34.8 |
+| UD-Q2_K_XL | 0.39 | 2806 | 488 / 539 | 27.0 / 30.3 | 2174 / 2450 / 2450 | 37.1 |
 
 **Quan sát** (≤ 60 chữ): 2-bit nhanh hơn bao nhiêu, và **có đáng không**? Bạn đã thử
 hỏi cùng một câu trên cả hai (`make serve` vs `.venv/bin/python labs/02-serve/serve.py --compare`)
 chưa? Chất lượng khác nhau thế nào?
 
-_Answer here._
+Q2 nhỏ hơn 0.11 GB và decode nhanh hơn 1.07× (37.1 so với 34.8 tok/s), nhưng TTFT P50 cao hơn. Qua cùng một câu hỏi, Q4 diễn đạt rõ và mạch lạc hơn; Q2 vẫn dùng được nhưng hơi lặp và kém chính xác hơn. Với máy này, Q2 đáng dùng nếu ưu tiên tốc độ/dung lượng.
 
 ---
 
-## 3. Serving under load  *(rubric 8, 9, 10 — 20 điểm)*
+## 3. Serving under load  (rubric 8, 9, 10 — 20 points)
 
-> Từ `benchmarks/02-server-results.md` (`make load-report`).
+> Results from the load tests and batching metrics.
 
 | Users | RPS | P50 (ms) | P95 (ms) | P99 (ms) | Eff. concurrency | Failures |
 |--:|--:|--:|--:|--:|--:|--:|
-| 10 | | | | | | |
-| 50 | | | | | | |
+| 10 | 0.69 | 12000 | 21000 | 21000 | 8.7 | 0.0% |
+| 50 | 0.83 | 24000 | 50000 | 56000 | 21.7 | 0.0% |
 
-- **Offered load tăng 5×, throughput thực tăng:** _<X.XX>×_
-- **P95 tăng:** _<X.XX>×_
-- **Effective concurrency ở 50 users:** _<số>_ so với `--parallel` = _<số>_ slots
+- **Offered load increased 5x; throughput increased:** 1.19x
+- **P95 increased:** 2.38x
+- **Effective concurrency at 50 users:** 21.7 versus `--parallel` = 4 slots
 
-**Peak `llamacpp:n_busy_slots_per_decode`** (từ `make metrics` khi `make load-50` đang
-chạy): _<số>_ / _<slots>_ slots
 
-**Saturation reading** (≤ 80 chữ): server của bạn bão hoà ở đâu, và **bằng chứng nào**
-thuyết phục bạn? Nếu P95 tăng nhanh hơn RPS thì phần latency thêm đó là queue time hay
-compute time — bạn biết bằng cách nào? Nếu bạn phải nâng goodput@SLO, bạn sẽ đổi knob
-nào **trước**, và vì sao knob đó?
+**Peak `llamacpp:n_busy_slots_per_decode`:** 3.64 / 4 slots (91%); `requests_deferred` reached 46.
 
-_Answer here._
-
+**Saturation reading:** The server was already saturated at or below 50 users. Increasing the offered load 5x raised throughput only 1.19x, while P95 latency increased 2.38x. The 3.64/4 busy-slot peak and 46 deferred requests show that requests were queued after the four decode slots were occupied. I would first test `--parallel 6` or `8`, then keep the setting only if P95 stays within the SLO.
 ---
 
-## 4. Integration  *(rubric 12, 13 — 15 điểm)*
+## 4. Integration  (rubric 12, 13 — 15 points)
 
-> Từ `make pipeline`. Nói thật cái nào real, cái nào stub — stub **không** mất điểm.
+> The pipeline used the shipped toy data and keyword-overlap retrieval.
 
-| Day | Piece | Real hay stub? |
+| Day | Piece | Real or stub? |
 |---|---|---|
-| N16 Cloud/IaC | | |
-| N17 Data pipeline | | |
-| N18 Lakehouse | | |
-| N19 Vector + features | | |
-| N20 Serving | `llama-server` | real |
+| N16 Cloud/IaC | Stub | Stub
+| N17 Data pipeline | Stub |Stub
+| N18 Lakehouse | Stub |Stub
+| N19 Vector + features | Stub |Stub
+| N20 Serving | `llama-server` — real |
 
-**Latency split** (mean của 3 query, từ output của `pipeline.py`):
+**Latency split** (mean of 3 queries):
 
-- embed: _<ms>_
-- retrieve: _<ms>_
-- llm: _<ms>_
-- **stage chiếm nhiều nhất:** _<stage>_ (_<%>_ của total)
+- embed: 0.0 ms
+- retrieve: 0.1 ms
+- llm: 7178.2 ms
+- **dominant stage:** llm (100% of total)
 
-**Reflection** (≤ 60 chữ): bottleneck ở đâu? Có khớp với kỳ vọng của bạn không? Nếu
-phải giảm latency của pipeline này 2×, bạn sẽ tấn công vào đâu?
-
-_Answer here._
-
+**Reflection:** The LLM is the clear bottleneck, which matches my expectation because generation is much more expensive than toy keyword retrieval. To halve latency, I would first reduce output length or use a faster/smaller quantization, then optimize the serving settings.
 ---
 
 ## 5. The single change that mattered most  *(rubric 11 — 10 điểm)*
@@ -111,12 +100,12 @@ _Answer here._
 > một before/after thật (`benchmarks/01-tuning-tg128.md`). Đổi quantization,
 > `LAB_N_CTX`, hay `--parallel` rồi đo lại cũng được.
 
-**Change:** _<vd: hạ -t từ 16 xuống 8; vd: đổi sang UD-Q2_K_XL; vd: --parallel 4 → 8>_
+**Change:** Tăng thread count từ 1 lên 6 (physical-core default)
 
 ```
-before:  <số + đơn vị>
-after:   <số + đơn vị>
-speedup: <X.Y>×
+before:  18.3 tok/s (1 thread)
+after:   34.2 tok/s (6 threads)
+speedup: 1.87×
 ```
 
 **Tại sao nó work** (1–2 đoạn — đây là phần grader đọc kỹ nhất):
@@ -126,7 +115,7 @@ memory bandwidth? vector width? cache residency? scheduling? queueing? Nếu k�
 **khác** với kỳ vọng từ deck — nói rõ, và giải thích vì sao. Grader thưởng điểm cho
 lập luận đúng về một kết quả bất ngờ, hơn là một con số đẹp không được giải thích._
 
-_Answer here._
+6 threads là điểm tối ưu vì đúng bằng số physical cores của Ryzen 5 4600H. Tăng lên 12 threads dùng logical cores nhưng tốc độ giảm còn 32.3 tok/s do các threads cạnh tranh execution resources, cache và memory bandwidth. Ở 24 threads, CPU bị oversubscribe và context switching làm throughput giảm mạnh còn 21.7 tok/s. Vì vậy, 6 threads là lựa chọn tốt nhất cho workload này.
 
 ---
 
