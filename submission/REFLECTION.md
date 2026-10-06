@@ -119,53 +119,61 @@ lập luận đúng về một kết quả bất ngờ, hơn là một con số 
 
 ---
 
-## 6. Bonus  *(optional — tối đa 10 điểm)*
+## 6. Bonus  (optional — tối đa 10 điểm)
 
-> Bỏ trống nếu không làm. Xem `docs/bonus/README.md`. Đừng làm hết — **một** finding sâu
-> ăn điểm hơn năm bảng nông.
+**Đã làm:** B2 — context-length sweep; B5/C8 — semantic cache offline với threshold sweep
 
-**Đã làm:** _<B1 build-compare / B2 sweep nào / B4 challenge nào / B5 lựa chọn nào>_
-
-**Numbers:**
+**Numbers — B2:**
 
 ```
-before:  <số>
-after:   <số>
-speedup: <X.Y>×
+256 tokens: 160.7 tok/s, prefill 1593.1 ms
+2048 tokens: 148.2 tok/s, prefill 13817.3 ms
+vs linear at 2048: 1.08x
+```
+
+**Numbers — B5/C8:**
+
+```
+before: 0/8 cached hits; 8 LLM calls
+after: 3/8 hits (38%); 5 LLM calls
+saved: 3 LLM calls, khoảng 750 ms trong offline simulation
 ```
 
 **Điều này nói lên gì mà deck chưa nói:**
 
-_(để trống nếu bạn không làm phần này)_
+Với B2, prefill tăng từ 1593.1 ms ở 256 tokens lên 13817.3 ms ở 2048 tokens,
+nhưng hệ số so với tuyến tính chỉ là 1.08x. Trong khoảng đo này chưa thấy rõ
+đường cong bậc hai; các thành phần tuyến tính của model vẫn chi phối. Tuy vậy,
+context dài vẫn làm TTFT tăng mạnh, nên RAG cần giới hạn số chunk được đưa vào prompt.
 
+Với B5/C8, mọi threshold từ 0.70 đến 0.95 đều cho 3/8 hits vì offline
+bag-of-words embedder chỉ tạo similarity gần 0.0 hoặc 1.0. Semantic cache
+đã bỏ qua ba lần gọi LLM trong mô phỏng, nhưng cần embedding model thật để
+threshold curve và nhận diện paraphrase có ý nghĩa hơn.
 ---
 
 ## 7. Điều làm bạn ngạc nhiên nhất  *(optional)*
-
-_(1–2 câu. Không bắt buộc, nhưng grader đọc hết.)_
-
-_(để trống nếu bạn không làm phần này)_
 
 ---
 
 ## 8. Self-check trước khi push
 
-- [ ] `hardware.json` committed
-- [ ] `models/active.json` committed
-- [ ] `benchmarks/01-quickstart-results.md` committed (`make bench`)
-- [ ] `benchmarks/01-tuning-tg128.md` committed (`make tune`)
-- [ ] `benchmarks/02-server-results.md` committed (`make load-report`)
-- [ ] `benchmarks/02-server-batching-u50.md` hoặc `-metrics-u50.csv` committed (`make metrics`)
-- [ ] `benchmarks/locust-10_stats.csv` + `locust-50_stats.csv` committed (`make load-10` / `load-50`)
-- [ ] `benchmarks/03-integration-results.md` committed (`make pipeline`)
-- [ ] Mọi section **"required — replace this line"** trong các file `benchmarks/*.md`
+- [x] `hardware.json` committed
+- [x] `models/active.json` committed
+- [x] `benchmarks/01-quickstart-results.md` committed (`make bench`)
+- [x] `benchmarks/01-tuning-tg128.md` committed (`make tune`)
+- [x] `benchmarks/02-server-results.md` committed (`make load-report`)
+- [x] `benchmarks/02-server-batching-u50.md` hoặc `-metrics-u50.csv` committed (`make metrics`)
+- [x] `benchmarks/locust-10_stats.csv` + `locust-50_stats.csv` committed (`make load-10` / `load-50`)
+- [x] `benchmarks/03-integration-results.md` committed (`make pipeline`)
+- [x] Mọi section **"required — replace this line"** trong các file `benchmarks/*.md`
       đã được thay bằng nhận xét của bạn
-- [ ] 5 screenshots trong `submission/screenshots/`
-- [ ] `make verify` → **exit 0**
-- [ ] Repo tên đúng mẫu `K4-L3-DAY20-HoVaTen-MSSV-ModelServing` (xem `docs/SUBMISSION.md`)
-- [ ] Repo GitHub ở chế độ **public**
-- [ ] Đã push và paste public URL vào VinUni LMS **trước 23:59 (UTC+7) ngày làm lab**
-- [ ] **Không** commit `models/*.gguf`, `runtime/` hay `.env` (đã có trong `.gitignore`)
+- [x] 5 screenshots trong `submission/screenshots/`
+- [x] `make verify` → **exit 0**
+- [x] Repo tên đúng mẫu `K4-L3-DAY20-HoVaTen-MSSV-ModelServing` (xem `docs/SUBMISSION.md`)
+- [x] Repo GitHub ở chế độ **public**
+- [x] Đã push và paste public URL vào VinUni LMS **trước 23:59 (UTC+7) ngày làm lab**
+- [x] **Không** commit `models/*.gguf`, `runtime/` hay `.env` (đã có trong `.gitignore`)
 
 **Quan trọng:** repo phải **public** đến khi điểm được công bố. Private → grader không
 xem được → 0 điểm.
@@ -174,4 +182,4 @@ xem được → 0 điểm.
 
 ## 9. Khai báo sử dụng AI  *(xem `docs/RULES.md` §3)*
 
-_(Công cụ nào, dùng vào việc gì. Ghi "Không dùng" nếu không dùng.)_
+Đã sử dụng ChatGPT/Codex để hỗ trợ chuyển đổi lệnh sang Windows, xử lý một số lỗi và chỉnh cách diễn đạt.

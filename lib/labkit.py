@@ -492,9 +492,13 @@ def bench_all_pp(output: str) -> list[tuple[int, float]]:
     """Every pp<N> row, as (tokens, tok/s) - for the ctx-length sweep."""
     import re
 
+    # Newer llama-bench builds include model/size/backend columns between the
+    # test name (pp<N>) and the final t/s value.
     return [
         (int(m.group(1)), float(m.group(2)))
-        for m in re.finditer(r"\|\s*pp(\d+)\s*\|\s*([0-9.]+)\s*±", output)
+        for m in re.finditer(
+            r"\|\s*pp(\d+)\b.*?\|\s*([0-9.]+)\s*±", output
+        )
     ]
 
 

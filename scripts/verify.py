@@ -74,7 +74,9 @@ def is_committed(path: pathlib.Path) -> bool | None:
         rel = str(path.resolve().relative_to(labkit.repo_root()))
     except ValueError:
         return None
-    return rel in TRACKED
+    # Git reports paths with forward slashes, while pathlib on Windows
+    # produces backslashes. Normalize both sides before checking tracking.
+    return rel.replace("\\", "/") in TRACKED
 
 
 class Report:
